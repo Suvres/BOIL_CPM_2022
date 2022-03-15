@@ -18,17 +18,14 @@ public class Node {
 
     private int timeGapInHours;
 
-    private List<Action> actionsIn, actionsOut;
+    private List<Action> actionsOut;
 
     public Node() {
+
+        actionsOut = new ArrayList<>();
+
     }
 
-    public void addActionsIn(Action action){
-        if(actionsIn==null)
-            actionsIn = new ArrayList<>();
-
-        actionsIn.add(action);
-    }
 
 
     public void addActionsOut(Action action){
@@ -38,4 +35,9 @@ public class Node {
         actionsOut.add(action);
     }
 
+    @Override
+    public String toString() {
+        return "id=" + id +
+                ", actionsOut=\n" + actionsOut;
+    }
 }
