@@ -1,6 +1,7 @@
 package com.boil.cpm.controller;
 
 
+import com.boil.cpm.entities.Action;
 import com.boil.cpm.entities.Node;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -29,20 +30,19 @@ public class NodeController {
 
     @PostMapping("/calculate")
     public String nodeListPost(@RequestBody MultiValueMap<String, String> values, BindingResult result) {
-            if(result.hasErrors()) {
+        if(result.hasErrors()) {
             return "error";
         }
 
         ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         String json = values.get("data").get(0);
 
-        List<Node> nodes;
+        List<Action> actions;
         try {
-             nodes = mapper.readValue(json, mapper.getTypeFactory().constructCollectionType(List.class, Node.class));
+             actions = mapper.readValue(json, mapper.getTypeFactory().constructCollectionType(List.class, Action.class));
         } catch (IOException e) {
             e.printStackTrace();
+            return "error";
         }
 
         // TODO OBSŁUGA NODÓW

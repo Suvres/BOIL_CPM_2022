@@ -7,7 +7,6 @@ class FormCPM {
     rowTemplate = [
         {'el': 'input', 'name': 'name', 'class': 'w-100 form-control', 'type': 'text', 'placeholder': 'Nazwa...'},
         {'el': 'input', 'name': 'durationInHours', 'value': '0', 'class': 'w-100 form-control',  'min': '0', 'step': '1', 'type': 'number', 'placeholder': 'Czas trwania'},
-        {'el': 'input', 'name': 'start', 'class': 'w-100 form-control', 'type': 'datetime-local', 'placeholder': 'Początek...', 'value': this.getNowDateStr()},
         {'el': 'input', 'name': 'predecessors', 'class': 'w-100 form-control', 'type': 'text', 'placeholder': 'Poprzednicy'},
     ]
 
@@ -81,11 +80,6 @@ class FormCPM {
         this.formBody.append(tr)
     }
 
-    getNowDateStr() {
-        const d = new Date()
-        return `${d.getFullYear()}-${('00' + (d.getMonth() + 1)).slice(-2)}-${('00' + d.getDate()).slice(-2)}T00:00`
-    }
-
     removeTableRow(element) {
         element.closest('tr').remove()
     }
@@ -118,6 +112,7 @@ class FormCPM {
         form.action = this.form.action
         form.method = "POST"
         form.classList.add('d-none')
+
 
         const i = document.createElement('input')
         i.name = 'data'
