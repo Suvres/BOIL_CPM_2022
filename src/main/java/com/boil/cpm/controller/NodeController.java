@@ -56,7 +56,7 @@ public class NodeController {
 
         // TODO OBSŁUGA NODÓW
 
-        Node root = nodeService.buildNetwork((Action[]) actions.toArray());
+        Node root = nodeService.buildNetwork(actions.toArray(new Action[0]));
 
         model.addAttribute("rootNode", root);
 
