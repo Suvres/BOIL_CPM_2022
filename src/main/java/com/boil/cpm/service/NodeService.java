@@ -73,15 +73,21 @@ public class NodeService {
                 }
             }
 
+            Node newNode = new Node();
+
+            if(tempNodeId == 0){
+                newNode.setId(nodeId);
+                nodes.add(newNode);
+                nodeId++;
+            }
+            else
+                newNode = nodes.get(tempNodeId);
+
             //if yes connect all predecessors to it, else make new node
             for(String actionName : action.getPredecessors()){
                 int index = actionNames.indexOf(actionName);
 
                 if(tempNodeId==0){
-                    Node newNode = new Node();
-                    newNode.setId(nodeId);
-                    nodes.add(newNode);
-                    nodeId++;
                     actions[index].setEndNode(newNode);
                 }
                 else
