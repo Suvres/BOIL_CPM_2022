@@ -5,47 +5,75 @@
     <title>BOIL_CPM</title>
     <link href="bootstrap/css/bootstrap.css" rel="stylesheet"/>
     <script src="bootstrap/js/bootstrap.min.js"></script>
+    <script src="vis/vis-network.min.js"></script>
     <script src="js/form.js"></script>
+    <style>
+        #network-graph {
+            min-height: 100vh;
+            max-height: 100vh;
+            border-right: 1px solid lightgray;
+            background: white;
+        }
+        canvas {
+            min-height: 100vh;
+        }
+        #error {
+            z-index: 1000000;
+            top: 25px;
+        }
+    </style>
 </head>
 <body class="bg-light">
+    <div id="error"
+         class="alert alert-danger alert-dismissible fade position-absolute start-50 translate-middle translate-middle-x"
+         role="alert">
+        <strong>Błąd w obliczeniach</strong> Należy sprawdzić poprawność listy<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
     <nav class="navbar navbar-dark bg-dark">
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">Metoda ścieżki krytycznej (CPM)</span>
         </div>
     </nav>
     <div class="container-fluid">
-        <form id="form-cpm"
-              method="post"
-              th:action="@{/calculate}">
-            <div class="m-3 row">
-                <table class="table table-responsive">
-                    <thead>
+        <div class="row">
+            <form id="form-cpm"
+                  class="col-6"
+                  method="post"
+                  th:action="@{/calculate}">
+                <div class="m-3 row">
+                    <table class="table table-responsive">
+                        <thead>
                         <th colspan="col">L.p</th>
                         <th colspan="col">Nazwa</th>
                         <th colspan="col">Czas trwania</th>
                         <th colspan="col">Poprzednicy</th>
                         <th colspan="col">Akcje</th>
-                    </thead>
-                    <tbody id="form-body">
+                        </thead>
+                        <tbody id="form-body">
 
-                    </tbody>
-                    <tfoot>
-                    <td colspan="6">
-                        <button type="submit"
-                                class="btn btn-success float-start">
-                            Policz
-                        </button>
+                        </tbody>
+                        <tfoot>
+                        <td colspan="6">
+                            <button type="submit"
+                                    class="btn btn-success float-start">
+                                Policz
+                            </button>
 
-                        <button id="add-form-row"
-                                type="button"
-                                class="btn btn-primary float-end fw-bold">
-                            Dodaj czynność +
-                        </button>
-                    </td>
-                    </tfoot>
-                </table>
+                            <button id="add-form-row"
+                                    type="button"
+                                    class="btn btn-primary float-end fw-bold">
+                                Dodaj czynność +
+                            </button>
+                        </td>
+                        </tfoot>
+                    </table>
+                </div>
+            </form>
+            <div id="network-graph"
+                 class="col-6 vh-100">
+
             </div>
-        </form>
+        </div>
     </div>
 </body>
 </html>
