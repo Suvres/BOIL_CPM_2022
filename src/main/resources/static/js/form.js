@@ -9,20 +9,14 @@ class FormCPM {
     network = null
     error
     networkOptions = {
+        groups: {
+            cpm: {color:{background:'red'}, font: {color: 'white'}},
+        },
+        physics: {
+            enabled: false
+        },
         layout: {
             randomSeed: 1,
-            hierarchical: {
-                enabled:false,
-                levelSeparation: 150,
-                nodeSpacing: 100,
-                treeSpacing: 200,
-                blockShifting: true,
-                edgeMinimization: true,
-                parentCentralization: true,
-                direction: 'LR',
-                sortMethod: 'directed',  // hubsize, directed
-                shakeTowards: 'roots'  // roots, leaves
-            }
         }
     }
     rowTemplate = [
@@ -132,6 +126,8 @@ class FormCPM {
             }
             object[keys[0]][keys[1]] = value
         });
+
+        object = this.normalizeSendObject(object)
         const json = JSON.stringify(object);
 
         await this.sendPost(json)
@@ -165,37 +161,10 @@ class FormCPM {
         let [nodes, edges] = this.getDataSet(object)
         let ids = []
         let ed = []
-        nodes = nodes.filter( value => {
-            if(!ids.includes(value['id'])) {
-                ids.push(value['id'])
-                return true
-            }
+        nodes = this.compactNode(nodes)
+        edges = edges.filter(this.edgeFilter(ed))
 
-            return false
-        })
-
-        edges = edges.filter( value => {
-
-            if(ed.length === 0) {
-                ed.push({from: value['from'], to: value['to']})
-                return true
-            }
-
-            let ex = false
-            ed.forEach( item => {
-                if(item['to'] === value['to'] && item['from'] === value['from']) {
-                    ex = true
-                }
-            })
-
-            if(!ex) {
-                ed.push({from: value['from'], to: value['to']})
-                return true
-            }
-
-            return false
-        })
-
+        console.log(edges)
         this.networkData = {
             nodes: new vis.DataSet(nodes),
             edges: new vis.DataSet(edges)
@@ -208,17 +177,21 @@ class FormCPM {
         let data = [[], []];
         data[0][0] = {}
         data[0][0]['id'] = json['id']
-        data[0][0]['label'] = `${json['id']}`
+        data[0][0]['margin'] = '10px'
+        if (json['id'] >= 0) {
+            data[0][0]['label'] = `${json['id']}`
+        }
 
         json['actionsOut'].forEach(row => {
             if(row['endNode'] !== null) {
                 let object = {}
                 object['from'] = json['id']
-                object['label'] = `${row['name']} ${row['durationInHours']}`
                 object['to'] = row['endNode']['id']
-                object['arrow'] = { to: { enabled: true, type: 'arrow'}}
-                if(object['label'].includes('Virtual')) {
+                object['arrows'] = { to: { enabled: true, type: 'arrow'}}
+                if(row['name'].includes('Virtual')) {
                     object['dashes'] = true
+                } else {
+                    object['label'] = `${row['name']} ${row['durationInHours']}`
                 }
 
                 const tmp_dataset = this.getDataSet(row['endNode'])
@@ -246,20 +219,35 @@ class FormCPM {
 
         // create an array with nodes
         const nodes = new vis.DataSet([
-            { id: 1, label: "Node 1" },
-            { id: 2, label: "Node 2" },
-            { id: 3, label: "Node 3" },
+            { fixed: { x:true, y:true }, id: 1, label: "Node 1", group: 'cpm'},
+            { id: 2, label: "Node 2", group: 'cpm' },
+            { id: 3, label: "Node 3", group: 'cpm' },
             { id: 4, label: "Node 4" },
-            { id: 5, label: "Node 5" },
+            { id: 5, label: "Node 5"},
+            { id: 6, label: "Node 6", group: 'cpm'},
+            { id: 7, label: "Node 7", group: 'cpm'},
+            { id: 8, label: "Node 8", group: 'cpm'},
+            { id: 9, label: "Node 9"},
+            { id: 10, label: "Node 10", group: 'cpm'},
+            { id: 11, label: "Node 11", group: 'cpm'},
         ]);
 
         // create an array with edges
         const edges = new vis.DataSet([
-            { from: 1, to: 3 },
-            { from: 1, to: 2 },
-            { from: 2, to: 4 },
-            { from: 2, to: 5 },
-            { from: 3, to: 3 },
+            {from: 1, to: 2, arrows: {to: { enabled: true, type: 'arrow'}}, color: 'red' },
+            {from: 2, to: 3, arrows: {to: { enabled: true, type: 'arrow'}}, color: 'red' },
+            {from: 2, to: 4, arrows: {to: { enabled: true, type: 'arrow'}} },
+            {from: 4, to: 5, arrows: {to: { enabled: true, type: 'arrow'}} },
+            {from: 3, to: 6, arrows: {to: { enabled: true, type: 'arrow'}}, color: 'red' },
+            {from: 5, to: 9, arrows: {to: { enabled: true, type: 'arrow'}} },
+            {from: 3, to: 5, arrows: {to: { enabled: true, type: 'arrow'}} },
+            {from: 9, to: 7, arrows: {to: { enabled: true, type: 'arrow'}} },
+            {from: 6, to: 7, arrows: {to: { enabled: true, type: 'arrow'}}, color: 'red' },
+            {from: 7, to: 8, arrows: {to: { enabled: true, type: 'arrow'}}, color: 'red' },
+            {from: 8, to: 9, arrows: {to: { enabled: true, type: 'arrow'}} },
+            {from: 9, to: 10, arrows: {to: { enabled: true, type: 'arrow'}} },
+            {from: 8, to: 10, arrows: {to: { enabled: true, type: 'arrow'}}, color: 'red'},
+            {from: 10, to: 11, arrows: {to: { enabled: true, type: 'arrow'}}, color: 'red' },
         ]);
 
         // create a network
@@ -267,8 +255,64 @@ class FormCPM {
             nodes: nodes,
             edges: edges,
         };
-        const options = {};
-        new vis.Network(this.networkGraph, data, options);
+        new vis.Network(this.networkGraph, data, this.networkOptions);
+    }
+
+    edgeFilter(ed) {
+        return value => {
+            if(ed.length === 0) {
+                ed.push({from: value['from'], to: value['to']})
+                return true
+            }
+
+            let ex = false
+            ed.forEach( item => {
+                if(item['to'] === value['to'] && item['from'] === value['from']) {
+                    ex = true
+                }
+            })
+
+            if(!ex) {
+                ed.push({from: value['from'], to: value['to']})
+                return true
+            }
+
+            return false
+        }
+    }
+
+    compactNode(nodes) {
+        let _nodes = []
+        nodes.forEach(item =>{
+            let ex = false
+
+            _nodes.forEach((v, k) => {
+                if(v['id'] === item['id'])
+                {
+                    ex = true
+                    if(v['level'] < item['level']) {
+                        _nodes[k] = item
+                    }
+                }
+            })
+
+            if(!ex) {
+                _nodes.push(item)
+            }
+        })
+
+        return _nodes
+    }
+
+    normalizeSendObject(object) {
+        let _tmp = [];
+        object.forEach(item => {
+            if(item !== null) {
+                _tmp.push(item)
+            }
+        })
+
+        return _tmp
     }
 }
 
