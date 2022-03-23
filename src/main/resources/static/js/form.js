@@ -180,6 +180,8 @@ class FormCPM {
         data[0][0]['margin'] = '10px'
         if (json['id'] >= 0) {
             data[0][0]['label'] = `${json['id']}`
+        } else {
+            data[0][0]['label'] = `W_${Math.abs(json['id'])}`
         }
 
         json['actionsOut'].forEach(row => {
