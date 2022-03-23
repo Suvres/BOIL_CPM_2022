@@ -10,7 +10,7 @@ class FormCPM {
     error
     networkOptions = {
         groups: {
-            cpm: {color:{background:'red'}, font: {color: 'white'}},
+            cpm: { color:{ background:'red' }, font: { color: 'white' }},
         },
         physics: {
             enabled: false
