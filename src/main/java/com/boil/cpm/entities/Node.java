@@ -26,7 +26,10 @@ public class Node {
 
     }
 
-
+    public Node(int id) {
+        this.id = id;
+        this.actionsOut = new ArrayList<>();
+    }
 
     public void addActionsOut(Action action){
         if(actionsOut == null)
