@@ -20,13 +20,53 @@ public class Node {
 
     private List<Action> actionsOut;
 
+    boolean critical;
+
     public Node() {
 
         actionsOut = new ArrayList<>();
 
     }
 
+    public int getId() {
+        return id;
+    }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public LocalDateTime getStart() {
+        return start;
+    }
+
+    public void setStart(LocalDateTime start) {
+        this.start = start;
+    }
+
+    public LocalDateTime getFinish() {
+        return finish;
+    }
+
+    public void setFinish(LocalDateTime finish) {
+        this.finish = finish;
+    }
+
+    public int getTimeGapInHours() {
+        return timeGapInHours;
+    }
+
+    public void setTimeGapInHours(int timeGapInHours) {
+        this.timeGapInHours = timeGapInHours;
+    }
+
+    public List<Action> getActionsOut() {
+        return actionsOut;
+    }
+
+    public void setActionsOut(List<Action> actionsOut) {
+        this.actionsOut = actionsOut;
+    }
 
     public void addActionsOut(Action action){
         if(actionsOut == null)

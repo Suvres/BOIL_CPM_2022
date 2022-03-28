@@ -26,6 +26,8 @@ public class NodeService {
 
         System.out.println(buildNetwork(actions));
 
+        Node root = buildNetwork(actions);
+
     }
 
     public Node buildNetwork(Action[] actions){
@@ -152,6 +154,24 @@ public class NodeService {
         return root;
     }
 
+    private void getFinishTime(Action[] actions, Node node, Node root){
+        if(root.getFinish() == null)
+            getFinishTime(actions, root.getActionsOut().get(0).getEndNode(), root);
+        else{
+            for(Action actionToFor : actions){
+                if(actionToFor.getEndNode().getId() == root.getId()){
+                    for(int i = 0; i < actions.length; i ++){
+                        if(actions[i].getEndNode().getActionsOut().contains(actionToFor)){
+                            actions[i].getEndNode().setFinish(
+                                    root.getFinish().minusHours(actionToFor.getDurationInHours()));
+                        }
+                    }
+                }
+            }
+        }
 
-
+        if(!root.getActionsOut().isEmpty() && root.getActionsOut().get(0).getName() != actions[0].getName()){
+           getFinishTime(actions, root, root);
+        }
+    }
 }
