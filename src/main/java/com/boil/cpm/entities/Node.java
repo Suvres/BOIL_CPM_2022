@@ -23,9 +23,7 @@ public class Node {
     boolean critical;
 
     public Node() {
-
         actionsOut = new ArrayList<>();
-
     }
 
     public int getId() {
