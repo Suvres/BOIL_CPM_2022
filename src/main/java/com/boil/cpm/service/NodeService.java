@@ -52,68 +52,106 @@ public class NodeService {
         }
 
         int nodeId = 0;
-        Node root = new Node();
         List<Node> nodes = new ArrayList<>();
-        nodes.add(root);
-
-        root.setId(nodeId);
-        nodeId++;
-
 
         for(Action action: actions){
 
-            //if no predecessors add action to root
-            if(action.getPredecessors() == null){
-                root.addActionsOut(action);
-                continue;
-            }
-            if(action.getPredecessors().length == 0){
-                root.addActionsOut(action);
-                continue;
-            }
+            Node samePredecessors = new Node(nodeId);
+            samePredecessors.addActionsOut(action);
 
+            boolean alreadyExists = false;
+            for(Node node : nodes){
 
-            int tempNodeId=0;
-
-            //find if there is predecessor with end node
-            for(String actionName : action.getPredecessors()){
-                int index = actionNames.indexOf(actionName);
-
-                if(actions[index].getEndNode() != null){
-                    tempNodeId=actions[index].getEndNode().getId();
+                if(node.getActionsOut().contains(action) && node.getId() != nodeId) {
+                    alreadyExists = true;
+                    break;
                 }
+
             }
 
-            Node newNode = new Node();
+            if(alreadyExists)
+                continue;
 
-            if(tempNodeId == 0){
-                newNode.setId(nodeId);
-                nodes.add(newNode);
-                nodeId++;
-            }
-            else
-                newNode = nodes.get(tempNodeId);
 
-            //if yes connect all predecessors to it, else make new node
-            for(String actionName : action.getPredecessors()){
-                int index = actionNames.indexOf(actionName);
+            for(Action action2 : actions){
 
-                if(tempNodeId==0){
-                    actions[index].setEndNode(newNode);
+                if(action == action2)
+                    continue;
+
+                if(action.getPredecessors().length != action2.getPredecessors().length)
+                    continue;
+
+                boolean hasSamePredecessors = true;
+
+                for(int i=0;i<action.getPredecessors().length;i++){
+
+                    if(!action.getPredecessors()[i].equals(action2.getPredecessors()[i])){
+                        hasSamePredecessors=false;
+                    }
+
                 }
-                else
-                    actions[index].setEndNode(nodes.get(tempNodeId));
+
+                if(hasSamePredecessors)
+                    samePredecessors.addActionsOut(action2);
 
             }
 
-            //add action to used node
-            if(tempNodeId == 0){
-                nodes.get(nodes.size()-1).addActionsOut(action);
-            }
-            else
-                nodes.get(tempNodeId).addActionsOut(action);
-
+            nodes.add(samePredecessors);
+            nodeId++;
         }
+
+        int virtualNodeId = -1;
+
+        for(Node node : nodes){
+
+            if(node.getActionsOut().get(0).getPredecessors().length==0)
+                continue;
+
+
+            for(String predecessor : node.getActionsOut().get(0).getPredecessors()){
+
+                for(Node node1 : nodes){
+
+                    if(node == node1)
+                        continue;
+
+                    for(Action action : node1.getActionsOut()){
+
+                        if(action.getName().equals(predecessor)){
+
+                            if(action.getEndNode() == null){
+                                action.setEndNode(node);
+                                break;
+                            }
+
+                            if(action.getEndNode().getId() < 0){
+
+                                Action tempAction = new Action();
+                                tempAction.setEndNode(node);
+                                tempAction.setName("Virtual_"+action.getName());
+
+                                action.getEndNode().addActionsOut(tempAction);
+                                break;
+                            }
+
+                            Node virtualNode = new Node(virtualNodeId);
+                            virtualNodeId--;
+                            Action tempAction = new Action(), tempAction2 = new Action();
+                            tempAction.setEndNode(node);
+                            tempAction2.setEndNode(action.getEndNode());
+                            tempAction.setName("Virtual_"+action.getName());
+                            tempAction2.setName("Virtual_"+action.getName());
+                            virtualNode.addActionsOut(tempAction);
+                            virtualNode.addActionsOut(tempAction2);
+
+                            action.setEndNode(virtualNode);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
 
         //end node
         Node endNode = new Node();
@@ -127,8 +165,6 @@ public class NodeService {
         nodes.add(endNode);
 
 
-        int virtualNodeIds =-1;
-
         //if there is a node with actions ending on the same node reconnect the sorter action via virtual node and action
         for(Node node: nodes){
 
@@ -139,8 +175,8 @@ public class NodeService {
                     if(action1.getEndNode() == action2.getEndNode() && action1 != action2){
                         Node virtualNode = new Node();
                         Action virtualAction = new Action();
-                        virtualNode.setId(virtualNodeIds);
-                        virtualNodeIds--;
+                        virtualNode.setId(virtualNodeId);
+                        virtualNodeId--;
                         virtualNode.addActionsOut(virtualAction);
 
                         if(action1.getDurationInHours() <= action2.getDurationInHours()){
@@ -160,7 +196,7 @@ public class NodeService {
 
         }
 
-        return root;
+        return nodes.get(0);
     }
 
     private void getStartTime(Action[] actions, Node nodePrev){
