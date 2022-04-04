@@ -20,15 +20,20 @@ public class Node {
 
     private List<Action> actionsOut;
 
+    boolean critical;
+
     public Node() {
-
         actionsOut = new ArrayList<>();
-
     }
 
-    public Node(int id) {
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
         this.id = id;
-        this.actionsOut = new ArrayList<>();
+    }
+  
     }
 
     public void addActionsOut(Action action){
