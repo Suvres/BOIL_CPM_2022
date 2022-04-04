@@ -5,6 +5,7 @@ import com.boil.cpm.entities.Node;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
@@ -28,9 +29,13 @@ public class NodeService {
 
         System.out.println(root);
 
+        root = setRoot(root);
+
+        getStartTime(actions, root);
+
 //        getFinishTime(actions, root, root);
 //
-//        System.out.println();
+        System.out.println();
 
     }
 
@@ -155,6 +160,47 @@ public class NodeService {
 
         }
 
+        return root;
+    }
+
+    private void getStartTime(Action[] actions, Node nodePrev){
+        //setting counting Node
+        Node nodeNext;
+
+        //going through each of actions
+        for(int i = 0; i < nodePrev.getActionsOut().size(); i++) {
+
+            //checking if nodePrev is root
+            nodeNext = nodePrev.getActionsOut().get(i).getEndNode();
+
+            //checking if nextNode is not null
+
+            var nexNodeTime = nodePrev.getStart().plusHours(nodePrev.getActionsOut().get(i).getDurationInHours());
+
+            var a = 0;
+            if (nodeNext.getStart() == null) {
+                nodeNext.setStart(nodePrev.getStart().plusHours(nodePrev.getActionsOut().get(i).getDurationInHours()));
+            }else if (nexNodeTime.isAfter(nodeNext.getStart())) {
+                nodeNext.setStart(nodePrev.getStart().plusHours(nodePrev.getActionsOut().get(i).getDurationInHours()));
+
+                //setting next nodes to count; recurrence
+                nodePrev = nodeNext;
+            }
+
+            //setting nextNode as prevNode
+            nodePrev = nodeNext;
+
+            //checking if nextNode of countingNode is null, finish of tree
+            if(nodePrev.getActionsOut() != null)
+                getStartTime(actions, nodePrev);
+        }
+    }
+
+    private Node setRoot(Node root){
+        root.setStart(LocalDateTime.now());
+        root.setFinish(LocalDateTime.now());
+        root.setTimeGapInHours(0);
+        root.setCritical(true);
         return root;
     }
 
