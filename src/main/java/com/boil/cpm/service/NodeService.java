@@ -221,8 +221,10 @@ public class NodeService {
 
     public void setEndTime(Node root){
 
-        if(root.getActionsOut().size() == 0)
+        if(root.getActionsOut().size() == 0) {
             root.setFinish(root.getStart());
+            root.setCritical(true);
+        }
 
         for(Action a : root.getActionsOut()){
 
@@ -235,6 +237,9 @@ public class NodeService {
                 root.setFinish(a.getEndNode().getFinish().minusHours(a.getDurationInHours()));
 
                 root.setTimeGapInHours(Duration.between(root.getStart(), root.getFinish()).toHoursPart());
+
+                if(root.getTimeGapInHours() == 0)
+                    root.setCritical(true);
 
             }
 

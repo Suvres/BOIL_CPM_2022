@@ -20,7 +20,7 @@ public class Node {
 
     private List<Action> actionsOut;
 
-    boolean critical;
+    private boolean critical;
 
     public Node() {
         actionsOut = new ArrayList<>();
@@ -48,7 +48,8 @@ public class Node {
     @Override
     public String toString() {
         return "id=" + id +
-                ", startTime = "+start+
+                ", isCritical = " +critical+
+                "\n, startTime = "+start+
                 "\n, endTime = "+finish+
                 "\n, timeGap = "+timeGapInHours+
                 "\n, actionsOut=\n" + actionsOut;
