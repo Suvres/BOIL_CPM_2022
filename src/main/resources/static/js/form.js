@@ -1,4 +1,5 @@
 class FormCPM {
+    resultTable
     networkData
     all_count
     form
@@ -34,8 +35,9 @@ class FormCPM {
         this.removeTableRow = document.querySelectorAll(".remove-form-row")
         this.networkGraph = document.getElementById("network-graph")
         this.error = document.getElementById("error")
+        this.resultTable = document.getElementById('result-table')
 
-        if(!this.form || !this.addFormRow || !this.formBody || !this.error) {
+        if(!this.form || !this.addFormRow || !this.formBody || !this.error || !this.resultTable) {
             throw new DOMException("Brak form, add-form-row, form-body, error")
         }
 
@@ -163,8 +165,8 @@ class FormCPM {
         let ed = []
         nodes = this.compactNode(nodes)
         edges = edges.filter(this.edgeFilter(ed))
+        this.createResultTable(nodes)
 
-        console.log(edges)
         this.networkData = {
             nodes: new vis.DataSet(nodes),
             edges: new vis.DataSet(edges)
@@ -178,6 +180,14 @@ class FormCPM {
         data[0][0] = {}
         data[0][0]['id'] = json['id']
         data[0][0]['margin'] = '10px'
+        data[0][0]['start'] = json['start']
+        data[0][0]['finish'] = json['finish']
+        data[0][0]['gap'] = json['timeGapInHours']
+
+        if(json['critical']) {
+            data[0][0]['group'] = 'cpm'
+        }
+
         if (json['id'] >= 0) {
             data[0][0]['label'] = `${json['id']}`
         } else {
@@ -190,6 +200,11 @@ class FormCPM {
                 object['from'] = json['id']
                 object['to'] = row['endNode']['id']
                 object['arrows'] = { to: { enabled: true, type: 'arrow'}}
+
+                if(row['critical']) {
+                    object['color'] = 'red'
+                }
+
                 if(row['name'].includes('Virtual')) {
                     object['dashes'] = true
                 } else {
@@ -315,6 +330,36 @@ class FormCPM {
         })
 
         return _tmp
+    }
+
+    createResultTable(nodes) {
+        const tbody = document.createElement('tbody')
+
+        nodes.forEach(node => {
+            const start = new Date(node['start'])
+            const finish = new Date(node['finish'])
+
+
+            const label_w = node['label'].includes('W_') ?  '<small><i>(wirtualne)</i></small>' : ''
+
+            const data = [`<b>${node['label']} ${label_w}</b>`, this.getDateTime(start), node['gap'], this.getDateTime(finish)]
+            const tr = document.createElement('tr')
+            data.forEach(item => {
+                const td = document.createElement('td')
+                td.innerHTML = item
+
+                tr.append(td)
+            })
+
+            tbody.append(tr)
+        })
+
+        this.resultTable.querySelector('tbody').remove()
+        this.resultTable.append(tbody)
+    }
+
+    getDateTime(date) {
+        return `${date.getFullYear()}-${('0' + (date.getMonth() + 1)).slice(-2)}-${('0' + date.getDate()).slice(-2)} ${date.getHours()}:00`
     }
 }
 
