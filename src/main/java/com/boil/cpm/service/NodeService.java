@@ -238,8 +238,10 @@ public class NodeService {
 
                 root.setTimeGapInHours(Duration.between(root.getStart(), root.getFinish()).toHoursPart());
 
-                if(root.getTimeGapInHours() == 0)
+                if(root.getTimeGapInHours() == 0) {
                     root.setCritical(true);
+                    a.setCritical(true);
+                }
 
             }
 
