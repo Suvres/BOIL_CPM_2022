@@ -26,14 +26,16 @@ public class Node {
         actionsOut = new ArrayList<>();
     }
 
+    public Node(int id) {
+        this.id = id;
+    }
+
     public int getId() {
         return id;
     }
 
     public void setId(int id) {
         this.id = id;
-    }
-  
     }
 
     public void addActionsOut(Action action){
@@ -46,6 +48,9 @@ public class Node {
     @Override
     public String toString() {
         return "id=" + id +
-                ", actionsOut=\n" + actionsOut;
+                ", startTime = "+start+
+                "\n, endTime = "+finish+
+                "\n, timeGap = "+timeGapInHours+
+                "\n, actionsOut=\n" + actionsOut;
     }
 }

@@ -5,10 +5,10 @@ import com.boil.cpm.entities.Node;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeMap;
 
 @Service
 public class NodeService {
@@ -25,17 +25,9 @@ public class NodeService {
 
         Action[] actions = new Action[]{A,B,C,D,E,F};
 
-        var root = buildNetwork(actions);
+        Node root = buildNetwork(actions);
 
         System.out.println(root);
-
-        root = setRoot(root);
-
-        getStartTime(actions, root);
-
-//        getFinishTime(actions, root, root);
-//
-        System.out.println();
 
     }
 
@@ -196,68 +188,57 @@ public class NodeService {
 
         }
 
+        Node root = nodes.get(0);
+
+        setStartTime(root);
+
+        setEndTime(root);
+
         return nodes.get(0);
     }
 
-    private void getStartTime(Action[] actions, Node nodePrev){
-        //setting counting Node
-        Node nodeNext;
+    public void setStartTime(Node root){
 
-        //going through each of actions
-        for(int i = 0; i < nodePrev.getActionsOut().size(); i++) {
+        if(root.getId()==0){
+            root.setStart(LocalDateTime.now());
+        }
 
-            //checking if nodePrev is root
-            nodeNext = nodePrev.getActionsOut().get(i).getEndNode();
+        if(root.getActionsOut() == null)
+            return;
 
-            //checking if nextNode is not null
+        for(Action a : root.getActionsOut()){
 
-            var nexNodeTime = nodePrev.getStart().plusHours(nodePrev.getActionsOut().get(i).getDurationInHours());
+            Node actionEndNode = a.getEndNode();
 
-            var a = 0;
-            if (nodeNext.getStart() == null) {
-                nodeNext.setStart(nodePrev.getStart().plusHours(nodePrev.getActionsOut().get(i).getDurationInHours()));
-            }else if (nexNodeTime.isAfter(nodeNext.getStart())) {
-                nodeNext.setStart(nodePrev.getStart().plusHours(nodePrev.getActionsOut().get(i).getDurationInHours()));
-
-                //setting next nodes to count; recurrence
-                nodePrev = nodeNext;
+            if(actionEndNode.getStart() == null || actionEndNode.getStart().compareTo(root.getStart().plusHours(a.getDurationInHours())) < 0){
+                actionEndNode.setStart(root.getStart().plusHours(a.getDurationInHours()));
             }
 
-            //setting nextNode as prevNode
-            nodePrev = nodeNext;
-
-            //checking if nextNode of countingNode is null, finish of tree
-            if(nodePrev.getActionsOut() != null)
-                getStartTime(actions, nodePrev);
+            setStartTime(actionEndNode);
         }
+
     }
 
-    private Node setRoot(Node root){
-        root.setStart(LocalDateTime.now());
-        root.setFinish(LocalDateTime.now());
-        root.setTimeGapInHours(0);
-        root.setCritical(true);
-        return root;
-    }
+    public void setEndTime(Node root){
 
-//    private void getFinishTime(Action[] actions, Node node, Node root){
-//        if(root.getFinish() == null)
-//            getFinishTime(actions, root.getActionsOut().get(0).getEndNode(), root);
-//        else{
-//            for(Action actionToFor : actions){
-//                if(actionToFor.getEndNode().getId() == root.getId()){
-//                    for(int i = 0; i < actions.length; i ++){
-//                        if(actions[i].getEndNode().getActionsOut().contains(actionToFor)){
-//                            actions[i].getEndNode().setFinish(
-//                                    root.getFinish().minusHours(actionToFor.getDurationInHours()));
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//
-//        if(!root.getActionsOut().isEmpty() && root.getActionsOut().get(0).getName() != actions[0].getName()){
-//           getFinishTime(actions, root, root);
-//        }
-//    }
+        if(root.getActionsOut().size() == 0)
+            root.setFinish(root.getStart());
+
+        for(Action a : root.getActionsOut()){
+
+            if(a.getEndNode().getFinish() == null){
+                setEndTime(a.getEndNode());
+            }
+
+            if(root.getFinish()==null || root.getFinish().compareTo(a.getEndNode().getFinish().minusHours(a.getDurationInHours())) > 0){
+
+                root.setFinish(a.getEndNode().getFinish().minusHours(a.getDurationInHours()));
+
+                root.setTimeGapInHours(Duration.between(root.getStart(), root.getFinish()).toHoursPart());
+
+            }
+
+        }
+
+    }
 }
