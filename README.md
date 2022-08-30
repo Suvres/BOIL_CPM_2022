@@ -1,6 +1,6 @@
 # BOIL_CPM_2022
 
-Program służy do wyznaczania ścieżki krytycznej z podanych w liście zdarzeń
+Program służy do wyznaczania ścieżki krytycznej z podanych w liście zdarzeń.  
 Aplikacja napisana z wykorzystaniem technologii:
 * spring (java)
 * javaScript
